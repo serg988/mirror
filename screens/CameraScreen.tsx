@@ -60,7 +60,7 @@ const CameraScreen = () => {
     <Camera
       type={1}
       zoom={value}
-      ratio='1:1'
+      ratio={ratio}
       ref={(ref) => {
         setCamera(ref)
       }}
