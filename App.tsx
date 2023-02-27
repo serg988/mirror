@@ -1,16 +1,11 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { StatusBar } from 'expo-status-bar'
 import CameraScreen from './screens/CameraScreen'
 
 export default function App() {
-  return <CameraScreen />
+  return (
+    <>
+      <StatusBar />
+      <CameraScreen />
+    </>
+  )
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

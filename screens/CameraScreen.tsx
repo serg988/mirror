@@ -50,9 +50,9 @@ const CameraScreen = () => {
       setVisible(false)
     } else {
       setVisible(true)
-      setTimeout(() => {
-        setVisible(false)
-      }, 7000)
+      // setTimeout(() => {
+      //   setVisible(false)
+      // }, 7000)
     }
   }
 
@@ -60,7 +60,7 @@ const CameraScreen = () => {
     <Camera
       type={1}
       zoom={value}
-      ratio={ratio}
+      ratio='1:1'
       ref={(ref) => {
         setCamera(ref)
       }}
