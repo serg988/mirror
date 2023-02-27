@@ -1,134 +1,111 @@
-import React, { useEffect, useState } from 'react'
-import { StyleSheet, View, Text, Dimensions, Platform } from 'react-native'
-import { Camera, requestCameraPermissionsAsync } from 'expo-camera'
+import { useEffect, useState } from 'react'
+import { Camera } from 'expo-camera'
+import {
+  useWindowDimensions,
+  TouchableOpacity,
+  Pressable,
+  View,
+} from 'react-native'
+import {} from 'react-native'
+import VerticalSlider from 'rn-vertical-slider'
 
-export default function App() {
-  //  camera permissions
-  const [hasCameraPermission, setHasCameraPermission] = useState(false)
-  const [camera, setCamera] = useState()
+const CameraScreen = () => {
+  const [hasPermission, setHasPermission] = useState(false)
+  const [camera, setCamera] = useState<Camera>(null)
+  const [value, setValue] = useState(0)
+  const [visible, setVisible] = useState(false)
+  console.log(
+    '🚀 ~ file: CameraScreen.tsx:11 ~ CameraScreen ~ visible:',
+    visible
+  )
 
-  // Screen Ratio and image padding
-  const [imagePadding, setImagePadding] = useState(0)
-  const [ratio, setRatio] = useState('20:9') // default is 4:3
-  console.log("🚀 ~ file: CameraScreen.tsx:13 ~ App ~ ratio:", ratio)
-  const { height, width } = Dimensions.get('window')
-  const screenRatio = height / width
-  const [isRatioSet, setIsRatioSet] = useState(false)
+  const [ratio, setRatio] = useState('1:1')
 
-  // on screen  load, ask for permission to use the camera
   useEffect(() => {
     async function getCameraStatus() {
-      const { status } = await requestCameraPermissionsAsync()
-      setHasCameraPermission(status === 'granted')
+      const { status } = await Camera.requestCameraPermissionsAsync()
+      setHasPermission(status == 'granted')
     }
     getCameraStatus()
   }, [])
-
-  // set the camera ratio and padding.
-  // this code assumes a portrait mode screen
-  const prepareRatio = async () => {
-    let desiredRatio = '4:3' // Start with the system default
-    // This issue only affects Android
-
-    //@ts-ignore
+  useEffect(() => {
+    if (!camera) return
+    async function getRatio() {
       const ratios = await camera.getSupportedRatiosAsync()
-      console.log("🚀 ~ file: CameraScreen.tsx:33 ~ prepareRatio ~ ratios:", ratios)
-
-      // Calculate the width/height of each of the supported camera ratios
-      // These width/height are measured in landscape mode
-      // find the ratio that is closest to the screen ratio without going over
-      let distances = []
-      let realRatios = []
-      let minDistance = null
-      for (const ratio of ratios) {
-        const parts = ratio.split(':')
-        
-        const realRatio = parseInt(parts[0]) / parseInt(parts[1])
-        realRatios[ratio] = realRatio
-      
-        // ratio can't be taller than screen, so we don't want an abs()
-        const distance = screenRatio - realRatio
-        distances[ratio] = realRatio
-        if (minDistance == null) {
-          minDistance = ratio
-        } else {
-          if (distance >= 0 && distance < distances[minDistance]) {
-            minDistance = ratio
-          }
-        }
-      }
-      // set the best match
-      desiredRatio = minDistance
-      //  calculate the difference between the camera width and the screen height
-      const remainder = Math.floor(
-        (height - realRatios[desiredRatio] * width) / 2
-      )
-      // set the preview padding and preview ratio
-      setImagePadding(remainder)
-      setRatio(desiredRatio)
-      // Set a flag so we don't do this
-      // calculation each time the screen refreshes
-      setIsRatioSet(true)
+      const r = ratios.slice(-1)[0]
+      setRatio(r)
     }
-  
+    getRatio()
+  }, [hasPermission])
 
-  // the camera must be loaded in order to access the supported ratios
-  const setCameraReady = async () => {
-    if (!isRatioSet) {
-      await prepareRatio()
+  const { width } = useWindowDimensions()
+  const [w, h] = ratio.split(':')
+  const height = Math.round((width * +w) / +h)
+
+  function pressHandler() {
+    // setVisible((current) =>
+    //   current === false? true : false
+    // )
+    if (visible) {
+      setVisible(false)
+    } else {
+      setVisible(true)
+      setTimeout(() => {
+        setVisible(false)
+      }, 7000)
     }
   }
 
-  if (hasCameraPermission === null) {
-    return (
-      <View style={styles.information}>
-        <Text>Waiting for camera permissions</Text>
-      </View>
-    )
-  } else if (hasCameraPermission === false) {
-    return (
-      <View style={styles.information}>
-        <Text>No access to camera</Text>
-      </View>
-    )
-  } else {
-    return (
-      <View style={styles.container}>
-        {/* 
-        We created a Camera height by adding margins to the top and bottom, 
-        but we could set the width/height instead 
-        since we know the screen dimensions
-        */}
-        <Camera
-          style={[
-            styles.cameraPreview,
-            { marginTop: imagePadding, marginBottom: imagePadding },
-          ]}
-          onCameraReady={setCameraReady}
-          type='front'
-          ratio={ratio}
-          ref={(ref) => {
-            setCamera(ref)
-          }}
-        ></Camera>
-      </View>
-    )
-  }
+  return (
+    <Camera
+      type={1}
+      zoom={value}
+      ratio={ratio}
+      ref={(ref) => {
+        setCamera(ref)
+      }}
+      style={{
+        height: height,
+        width: '100%',
+        flex: 1,
+        // justifyContent: 'flex-end',
+        // alignItems: 'flex-end'
+      }}
+    >
+      <Pressable style={{ zIndex: 0.5, flex: 1 }} onPress={pressHandler}>
+        {visible && (
+          <View
+            style={{
+              marginVertical: 300,
+              flex: 1,
+              alignSelf: 'flex-end',
+              // alignItems: 'center',
+            }}
+          >
+            <VerticalSlider
+              // disabled
+              value={value}
+              onChange={(value) => setValue(value)}
+              onComplete={() => alert(111)}
+              height={height / 2}
+              width={37}
+              step={0.01}
+              min={0}
+              max={0.5}
+              borderRadius={5}
+              minimumTrackTintColor='rgba(33,33,173, 0.3)'
+              maximumTrackTintColor='rgba(33,33,33, 0.4)'
+              showBallIndicator={false}
+              ballIndicatorColor='#2979FF'
+              ballIndicatorTextColor='#fff'
+              ballIndicatorWidth={80}
+              ballIndicatorHeight={40}
+            />
+          </View>
+        )}
+      </Pressable>
+    </Camera>
+  )
 }
 
-const styles = StyleSheet.create({
-  information: {
-    flex: 1,
-    justifyContent: 'center',
-    alignContent: 'center',
-    alignItems: 'center',
-  },
-  container: {
-    flex: 1,
-    backgroundColor: '#000',
-    justifyContent: 'center',
-  },
-  cameraPreview: {
-    flex: 1,
-  },
-})
+export default CameraScreen
