@@ -23,7 +23,7 @@
       "developmentClient": true
     },
     "production": {
-      "channel": "production"
+      "channel": "main"
     }
   },
   "submit": {

@@ -11,6 +11,7 @@ import VerticalSlider from 'rn-vertical-slider'
 
 const CameraScreen = () => {
   const [hasPermission, setHasPermission] = useState(false)
+  //@ts-ignore
   const [camera, setCamera] = useState<Camera>(null)
   const [value, setValue] = useState(0)
   const [visible, setVisible] = useState(false)
@@ -62,6 +63,7 @@ const CameraScreen = () => {
       zoom={value}
       ratio={ratio}
       ref={(ref) => {
+        //@ts-ignore
         setCamera(ref)
       }}
       style={{
